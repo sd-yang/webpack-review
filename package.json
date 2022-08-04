@@ -1,0 +1,30 @@
+{
+  "name": "webpack-review",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sd-yang/webpack-review.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sd-yang/webpack-review/issues"
+  },
+  "homepage": "https://github.com/sd-yang/webpack-review#readme",
+  "devDependencies": {
+    "@babel/core": "^7.18.10",
+    "@babel/plugin-transform-runtime": "^7.18.10",
+    "@babel/preset-env": "^7.18.10",
+    "@babel/runtime": "^7.18.9",
+    "@babel/runtime-corejs3": "^7.18.9",
+    "babel-loader": "^8.2.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}
