@@ -1,8 +1,10 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const isDev = process.env.NODE_ENV === 'development';
-const config = require('./public/config')[isDev ? 'dev' : 'build'];
+const config = require('./buildConfig')[isDev ? 'dev' : 'build'];
 const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
 
 module.exports = {
     entry: './src/index.js',
@@ -11,7 +13,6 @@ module.exports = {
         filename: 'bundle.[hash].js',
         publicPath: '/' //通常是CDN地址
     },
-    mode: isDev ? 'development' : 'production',
     module: {
         rules: [
             {
@@ -30,23 +31,29 @@ module.exports = {
                         ]
                     }
                 },
-                exclude: /node_modules/
+                include: [path.resolve(__dirname, 'src')]
             },
             {
                 test: /\.(le|c)ss$/,
-                use: ['style-loader', 'css-loader', {
-                    loader: 'postcss-loader',
-                    options: {
-                        plugins: function() {
-                            require('autoprefixer')({
-                                "overrideBrowserslist": [
-                                    ">0.25%",
-                                    "not dead"
-                                ]
-                            })
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            hmr: isDev,
+                            reloadAll: true
                         }
-                    }
-                }, 'less-loader'],
+                    },
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: function () {
+                                require('autoprefixer')()
+                            }
+                        }
+                    },
+                    'less-loader'
+                ],
                 exclude: /node_modules/
             },
             {
@@ -56,7 +63,7 @@ module.exports = {
                         loader: 'url-loader',
                         options: {
                             limit: 10240, //10K
-                            esModule: false ,
+                            esModule: false,
                             outputPath: 'assets'
                         }
                     }
@@ -76,12 +83,28 @@ module.exports = {
             hash: false, // 是否加上 hash
             config: config.template
         }),
-        new CleanWebpackPlugin() 
+        // 将 public/js 中的文件直接拷贝到 dist 目录下
+        new CopyWebpackPlugin([
+            {
+                from: 'public/js/*.js',
+                to: path.resolve(__dirname, 'dist', 'js'),
+                flatten: true,
+            }
+        ], {
+            ignore: ['other.js']
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'css/[name].css'
+            //个人习惯将css文件放在单独目录下
+            //publicPath:'../'   //如果你的output的publicPath配置的是 './' 这种相对路径，那么如果将css文件放在单独目录下，记得在这里指定一下publicPath 
+        }),
+        // 提供全局变量的引入
+        new webpack.ProvidePlugin({
+            React: 'react',
+            Component: ['react', 'Component'],
+        }),
     ],
-    devtool: 'cheap-module-eval-source-map', //开发环境下使用
-    devServer: {
-        port: 3333,
-        open: true,
-        compress: true,
-    }
+    resolve: {
+        alias: {}
+    },
 }
